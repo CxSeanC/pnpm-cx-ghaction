@@ -29,6 +29,7 @@ Go to your GitHub repository → Settings → Secrets and Variables → Actions.
 Click 'New repository secret'.
 Set the name to GH_PAT.
 Paste your Personal Access Token (PAT) as the value and save.
+
 **2️⃣ Add the GitHub Action**
 
 Ensure your .github/workflows/convert-and-scan.yml file contains the following:
@@ -140,6 +141,7 @@ jobs:
           cx_tenant: ${{ secrets.CX_TENANT }}
           cx_client_id: ${{ secrets.CX_CLIENT_ID }}
           cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
+
 **3️⃣ Push Changes and Verify**
 
 Once you've added the workflow, push a new commit to trigger the GitHub Action.
