@@ -34,6 +34,19 @@ jobs:
           pnpm --version
         shell: bash
 
+      - name: Ensure pnpm-lock.yaml Exists
+        run: |
+          if [ ! -f "pnpm-lock.yaml" ]; then
+            echo "⚠️ pnpm-lock.yaml not found, generating..."
+            pnpm install --lockfile-only
+            git add pnpm-lock.yaml
+            git commit -m "Auto-generate pnpm-lock.yaml"
+            git push origin master
+          else
+            echo "✅ pnpm-lock.yaml already exists."
+          fi
+        shell: bash
+
       - name: Securely Convert All pnpm-lock.yaml Files to package-lock.json
         run: |
           set -euo pipefail
