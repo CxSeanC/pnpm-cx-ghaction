@@ -71,7 +71,7 @@ jobs:
             npm-manifest-
 
       - name: Run Checkmarx ONE Scan (Secure Authentication)
-        uses: checkmarx/ast-github-action@v2.0.44
+        uses: checkmarx/ast-github-action@2.0.44
         with:
           project_name: ${{ github.repository }}
           base_uri: https://ast.checkmarx.net
