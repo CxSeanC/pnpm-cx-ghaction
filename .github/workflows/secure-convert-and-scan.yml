@@ -77,7 +77,7 @@ jobs:
         uses: checkmarx/ast-github-action@main
         with:
           project_name: ${{ github.repository }}
-          base_uri: https://us.ast.checkmarx.net
+          base_uri: https://ast.checkmarx.net
           cx_tenant: ${{ secrets.CX_TENANT }}
           cx_client_id: ${{ secrets.CX_CLIENT_ID }}
           cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
