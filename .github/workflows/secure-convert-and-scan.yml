@@ -3,10 +3,10 @@ name: Secure Convert pnpm to npm and Scan with Checkmarx ONE
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 permissions:
   contents: read
