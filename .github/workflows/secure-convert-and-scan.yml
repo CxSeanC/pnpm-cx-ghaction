@@ -39,11 +39,11 @@ jobs:
             dir=$(dirname "$pnpm_lock")
 
             if [[ "$dir" != ./[^.]* ]]; then
-              echo "⚠️ Skipping unsafe directory: $dir"
+              echo "Skipping unsafe directory: $dir"
               continue
             fi
 
-            echo "🔍 Processing $pnpm_lock in $dir..."
+            echo "Processing $pnpm_lock in $dir..."
 
             if [ ! -f "$dir/package.json" ]; then
               echo "Skipping $dir (no package.json found)"
