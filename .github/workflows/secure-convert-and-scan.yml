@@ -27,8 +27,12 @@ jobs:
         with:
           node-version: 18
           cache: 'pnpm'
-      
-      - run: npm install -g pnpm jq
+
+      - name: Install pnpm (Fix Missing Binary)
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm --version
         shell: bash
 
       - name: Securely Convert All pnpm-lock.yaml Files to package-lock.json
@@ -39,24 +43,24 @@ jobs:
             dir=$(dirname "$pnpm_lock")
 
             if [[ "$dir" != ./[^.]* ]]; then
-              echo "Skipping unsafe directory: $dir"
+              echo "⚠️ Skipping unsafe directory: $dir"
               continue
             fi
 
-            echo "Processing $pnpm_lock in $dir..."
+            echo "🔍 Processing $pnpm_lock in $dir..."
 
             if [ ! -f "$dir/package.json" ]; then
-              echo "Skipping $dir (no package.json found)"
+              echo "⚠️ Skipping $dir (no package.json found)"
               continue
             fi
 
-            (cd "$dir" && pnpm import --silent)
+            (cd "$dir" && pnpm import --silent) || { echo "❌ pnpm import failed in $dir"; exit 1; }
 
             if [ -f "$dir/package-lock.json" ]; then
               mkdir -p "build/cache/$dir"
               cp "$dir/package.json" "$dir/package-lock.json" "build/cache/$dir/"
             else
-              echo "Error: package-lock.json was not generated in $dir"
+              echo "❌ Error: package-lock.json was not generated in $dir"
               exit 1
             fi
           done
@@ -66,15 +70,15 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build/cache
-          key: npm-manifest-${{ github.sha }}
+          key: npm-manifest-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            npm-manifest-
+            npm-manifest-${{ runner.os }}-
 
       - name: Run Checkmarx ONE Scan (Secure Authentication)
-        uses: checkmarx/ast-github-action@2.0.44
+        uses: Checkmarx/ast-github-action@v2
         with:
           project_name: ${{ github.repository }}
-          base_uri: https://ast.checkmarx.net
+          base_uri: https://us.ast.checkmarx.net
           cx_tenant: ${{ secrets.CX_TENANT }}
           cx_client_id: ${{ secrets.CX_CLIENT_ID }}
           cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
