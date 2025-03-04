@@ -83,7 +83,7 @@ jobs:
               mkdir -p "build/cache/$dir"
               cp "$dir/package.json" "$dir/package-lock.json" "build/cache/$dir/"
             else
-              echo "❌ Error: package-lock.json was not generated in $dir"
+              echo "❌  Error: package-lock.json was not generated in $dir"
               exit 1
             fi
           done
