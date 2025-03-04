@@ -39,6 +39,8 @@ jobs:
           if [ ! -f "pnpm-lock.yaml" ]; then
             echo "⚠️ pnpm-lock.yaml not found, generating..."
             pnpm install --lockfile-only
+            git config --local user.email "sean.carroll@checkmarx.com"
+            git config --local user.name "cxseanc"
             git add pnpm-lock.yaml
             git commit -m "Auto-generate pnpm-lock.yaml"
             git push origin master
