@@ -1,0 +1,80 @@
+name: Secure Convert pnpm to npm and Scan with Checkmarx ONE
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  convert-validate-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (read-only)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Securely Set Up Node.js and Install Dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      
+      - run: npm install -g pnpm jq
+        shell: bash
+
+      - name: Securely Convert All pnpm-lock.yaml Files to package-lock.json
+        run: |
+          set -euo pipefail
+          mkdir -p build/cache
+          find . -type f -name "pnpm-lock.yaml" -print0 | while IFS= read -r -d '' pnpm_lock; do
+            dir=$(dirname "$pnpm_lock")
+
+            if [[ "$dir" != ./[^.]* ]]; then
+              echo "⚠️ Skipping unsafe directory: $dir"
+              continue
+            fi
+
+            echo "🔍 Processing $pnpm_lock in $dir..."
+
+            if [ ! -f "$dir/package.json" ]; then
+              echo "Skipping $dir (no package.json found)"
+              continue
+            fi
+
+            (cd "$dir" && pnpm import --silent)
+
+            if [ -f "$dir/package-lock.json" ]; then
+              mkdir -p "build/cache/$dir"
+              cp "$dir/package.json" "$dir/package-lock.json" "build/cache/$dir/"
+            else
+              echo "Error: package-lock.json was not generated in $dir"
+              exit 1
+            fi
+          done
+        shell: bash
+
+      - name: Cache npm manifests for Checkmarx ONE
+        uses: actions/cache@v3
+        with:
+          path: build/cache
+          key: npm-manifest-${{ github.sha }}
+          restore-keys: |
+            npm-manifest-
+
+      - name: Run Checkmarx ONE Scan (Secure Authentication)
+        uses: Checkmarx/ast-github-action@v2
+        with:
+          project_name: ${{ github.repository }}
+          base_uri: https://ast.checkmarx.net
+          cx_tenant: ${{ secrets.CX_TENANT }}
+          cx_client_id: ${{ secrets.CX_CLIENT_ID }}
+          cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
