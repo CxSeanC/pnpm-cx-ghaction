@@ -22,16 +22,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Securely Set Up Node.js and Install Dependencies
+      - name: Securely Set Up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
 
       - name: Install pnpm (Fix Missing Binary)
         run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
+          npm install -g pnpm
+          export PATH=$(npm root -g)/pnpm/bin:$PATH
           pnpm --version
         shell: bash
 
